@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Servidor de Streaming</title>
+</head>
+<body>
+	<h1>Servidor de Streaming</h1>
+	<p>Para iniciar emisión de streaming de video obtenido de la cámara</p>
+	<video id = "video"></video>
+	<canvas id = "canvas" width="615" height="450"></canvas>
+	<script src = "/socket.io/socket.io.js"></script>
+	<script>
+		(function(d, io){
+			'use-strict'
+
+			var ion = io();
+			let startCamera = false;
+			let video = d.getElementById('video');
+			let canvas = d.getElementById('canvas');
+			let context = canvas.getContext('2d');
+
+			navigator.streaming = (
+				navigator.getUserMedia ||
+				navigator.webkitGetUserMedia ||
+				navigator.mozGetUserMedia ||
+				navigator.msGetUserMedia
+			);
+
+			navigator.streaming({
+				video : true,
+				audio : false
+			}, function(stream){
+				startCamera = true;
+				video.src = window.URL.createObjectURL(stream);
+			}, function(err){
+				alert("Error al intentar acceder a la cámara: " + err);
+			});
+
+			window.playVideo = (function(callback){
+				return window.requestAnimationFrame ||
+					window.webkitRequestAnimationFrame ||
+					window.mozRequestAnimationFrame ||
+					window.msRequestAnimationFrame ||
+					function(callback){
+						window.setTimeout(callback, 1000/100);
+					}
+			})();
+
+			function streamVideo(context, canvas, video){
+				let outputStream = canvas.toDataURL('image/jpeg', .2);
+				context.drawImage(video, 0, 0);
+
+				if(startCamera)
+					ion.emit('streaming', outputStream);
+
+				playVideo(function(){
+					streamVideo(context, canvas, video);
+				})
+			};
+
+			window.addEventListener('load', function(){
+				video.autoplay = true;
+				video.style.display = "none";
+				streamVideo(context, canvas, video);
+			});
+
+		})(document, io);
+	</script>
+</body>
+</html>
