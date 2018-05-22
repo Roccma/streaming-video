@@ -1,11 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Servidor de Streaming</title>
+	<style>
+		*{
+			padding: 0;
+			margin:  0;
+		}
+
+		#video{
+			position: fixed;
+			right: 0;
+			bottom: 0;
+		}
+	</style>
 </head>
 <body>
-	<h1>Servidor de Streaming</h1>
-	<p>Para iniciar emisión de streaming de video obtenido de la cámara</p>
 	<video id = "video"></video>
 	<canvas id = "canvas" width="615" height="450"></canvas>
 	<script src = "/socket.io/socket.io.js"></script>
@@ -60,7 +71,9 @@
 
 			window.addEventListener('load', function(){
 				video.autoplay = true;
-				video.style.display = "none";
+				video.width = window.innerWidth;
+				video.heigh = window.innerHeight;
+				canvas.style.display = "none";
 				streamVideo(context, canvas, video);
 			});
 
